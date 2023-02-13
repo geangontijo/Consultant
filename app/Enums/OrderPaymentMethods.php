@@ -6,7 +6,6 @@ enum OrderPaymentMethods: string
 {
     use EnumCasesAsStringArray;
 
-    case Card = 'card';
-    case Boleto = 'boleto';
-
+    case CreditCard = 'credit_card';
+    case BankSlip = 'bank_slip';
 }
