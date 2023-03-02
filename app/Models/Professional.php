@@ -16,10 +16,13 @@ class Professional extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'user_id';
+
     protected $casts = [
         'crm' => OnlyNumbers::class,
         'email' => 'string',
         'phone_number' => OnlyNumbers::class,
+        'user_id' => 'string',
     ];
 
     protected $fillable = [
@@ -37,5 +40,4 @@ class Professional extends Model
     {
         return $this->belongsTo(User::class, 'user_id', '_id');
     }
-
 }

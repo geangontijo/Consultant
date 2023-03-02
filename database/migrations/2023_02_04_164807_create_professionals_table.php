@@ -17,7 +17,7 @@ return new class extends Migration
             $table->char('user_id', 24)->primary()->default(null);
             $table->string('crm');
             $table->string('email')->unique();
-            $table->string('phone_number', 11);
+            $table->char('phone_number', 11);
             $table->string('photo_url');
             $table->timestamps();
         });

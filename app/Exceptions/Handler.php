@@ -4,6 +4,10 @@ namespace App\Exceptions;
 
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Fluent;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Throwable;
@@ -47,6 +51,10 @@ class Handler extends ExceptionHandler
      */
     public function register()
     {
+        if (!Request::wantsJson()) {
+            return;
+        }
+
         $this->renderable(function (ValidationException $exception) {
             return new JsonResponse([
                 'errors' => $exception->errors()

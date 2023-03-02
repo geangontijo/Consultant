@@ -10,7 +10,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 class ProfessionalController extends Controller
 {
-
     public function storeAnnounce(Request $request)
     {
         return DB::transaction(function () use ($request) {
@@ -51,5 +50,4 @@ class ProfessionalController extends Controller
 //            return new JsonResponse(compact('consultation_announcement'));
 //        });
     }
-
 }

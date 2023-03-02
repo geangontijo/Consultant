@@ -4,6 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Casts\OnlyNumbers;
+use App\Casts\VerificationJson;
+use DateTime;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Jenssegers\Mongodb\Auth\User as Authenticatable;
@@ -13,13 +15,18 @@ use Illuminate\Support\Facades\Validator;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
- * @property string       $email
- * @property string       $id
+ * @property string $email
+ * @property string $id
  * @property string $password
+ * @property Verification|null $verification
+ * @property DateTime $verified_at
+ * @property string $phone_number
  */
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens;
+    use HasFactory;
+    use Notifiable;
 
     protected $connection = 'mongodb';
 
@@ -31,6 +38,9 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'password',
+        'email',
+        'verification',
+        'verified_at'
     ];
 
     /**
@@ -41,6 +51,12 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'verification'
+    ];
+
+    protected $casts = [
+        'verified_at' => 'datetime',
+        'phone_number' => OnlyNumbers::class,
     ];
 
     protected function password(): Attribute
@@ -53,5 +69,22 @@ class User extends Authenticatable
                 return Hash::make($value);
             }
         );
+    }
+
+    protected function verification(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string|Verification|array|null $value) => match (true) {
+                is_string($value) => new Verification(json_decode($value, true)),
+                is_array($value) => new Verification($value),
+                default => $value
+            },
+            set: fn (?Verification $value) => $value
+        );
+    }
+
+    public function routeNotificationForWhatsApp(): string
+    {
+        return $this->phone_number;
     }
 }

@@ -19,8 +19,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class ConsultationAppointmentTime extends Model
 {
-    use HasFactory,
-        DefaultDateFormatModel;
+    use HasFactory;
+    use DefaultDateFormatModel;
 
     protected $fillable = [
         'start',
@@ -63,6 +63,11 @@ class ConsultationAppointmentTime extends Model
         return $this->belongsTo(ConsultationAnnouncement::class);
     }
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
     /**
      * @throws \Exception
      */
@@ -72,7 +77,6 @@ class ConsultationAppointmentTime extends Model
             $dateTime = Carbon::parse($value)->toDateTime();
             if (($attributeName === 'start' && empty($this->attributes['end'])) ||
                 ($attributeName === 'end' && empty($this->attributes['start']))) {
-
                 return $dateTime;
             }
 
@@ -89,5 +93,4 @@ class ConsultationAppointmentTime extends Model
             return $dateTime;
         };
     }
-
 }

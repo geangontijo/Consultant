@@ -4,7 +4,6 @@ namespace App\Enums;
 
 trait EnumCasesAsStringArray
 {
-
     /**
      * @return array<string>
      */

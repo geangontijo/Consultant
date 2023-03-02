@@ -21,7 +21,9 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 use Omnipay\Common\Http\Client;
 use Omnipay\Omnipay;
 use Psr\Http\Client\ClientInterface;
@@ -31,7 +33,6 @@ use Throwable;
 
 class CheckoutController extends Controller
 {
-
     /**
      * @throws Throwable
      */
@@ -53,6 +54,7 @@ class CheckoutController extends Controller
                     ['id', 'price']
                 );
                 $consultationAppointmentTime->status = 'reserved';
+                $consultationAppointmentTime->user()->associate($request->user());
                 $consultationAppointmentTime->save();
 
                 $amount += $consultationAppointmentTime->price;
@@ -135,8 +137,35 @@ class CheckoutController extends Controller
             CartItem::insert(array_map(fn ($cartItem) => $cartItem->toArray(), $cartItems));
 
             $order->getRelationValue('payments');
-            return $order;
+
+            return Redirect::route('checkout', ['order' => $orderUuid]);
         });
     }
 
+    public function pay(string $order, Request $request)
+    {
+        /** @var PendingRequest $httpClientStripe */
+        $httpClientStripe = Http::stripe();
+//        $orderPayment = OrderPayment::findOrFail($request->payment_method_id);
+
+//        $httpClientStripe->post('payment_intents/' . $order->payments()->where('method', OrderPaymentMethods::CreditCard)->first()->transaction_id . '/confirm', [
+//            'payment_method' => $orderPayment->transaction_id,
+//            'shipping' => [
+//                'name' => 'Jenny Rosen',
+//                'address' => [
+//                    'line1' => '510 Townsend St',
+//                    'postal_code' => '25523166',
+//                    'city' => 'San Francisco',
+//                    'state' => 'MG',
+//                    'country' => 'BR',
+//                ],
+//            ],
+//            'payment_method_options' => [
+//                'card' => [
+//                    'cvc_token' => $request->cvc_token,
+//                ],
+//            ]
+//        ]);
+        return Redirect::route('home')->with('success', 'Pagamento realizado com sucesso');
+    }
 }

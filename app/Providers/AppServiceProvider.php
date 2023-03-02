@@ -4,13 +4,15 @@ namespace App\Providers;
 
 use App\Models\PersonalAccessToken;
 use App\Services\HttpClient\HttpClientStripe;
-use GuzzleHttp\Client;
 use GuzzleHttp\Middleware;
 use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Notifications\ChannelManager;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Manager;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
@@ -26,9 +28,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        if ($this->app->environment('local')) {
+        if (!App::isProduction()) {
             $this->app->register(\Laravel\Telescope\TelescopeServiceProvider::class);
             $this->app->register(TelescopeServiceProvider::class);
+            $this->app->register(\Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class);
         }
     }
 
@@ -39,17 +42,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        if (!App::runningInConsole() || !App::runningUnitTests()) {
+        if (!App::runningInConsole() && !App::runningUnitTests()) {
             class_alias(PersonalAccessToken::class, \Laravel\Sanctum\PersonalAccessToken::class);
         }
 
-        Http::macro('stripe', fn() => Http::withMiddleware(
+        Http::macro('stripe', fn () => Http::withMiddleware(
             Middleware::mapRequest(function (RequestInterface $request) {
                 return $request->withHeader(
                     'Authorization',
-                    'Basic '.base64_encode(
-                        'sk_test_51MaTmCJtc69aInenGCb74m8UFq1uMXxeh6WjLbEQmJlkem4DczEkibt9P7M5UmOkTm4cgzRpJU90PKGvgAcN53cY008jPhW3yp'
-                    ).':'
+                    'Basic ' . base64_encode(
+                        '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'
+                    ) . ':'
                 );
             })
         )->withMiddleware(

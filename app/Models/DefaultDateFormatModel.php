@@ -8,5 +8,4 @@ trait DefaultDateFormatModel
     {
         return 'Y-m-d H:i:s';
     }
-
 }

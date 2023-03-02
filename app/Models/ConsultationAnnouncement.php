@@ -4,13 +4,16 @@ namespace App\Models;
 
 use App\Enums\ConsultationAnnouncementCategories;
 use App\Http\Controllers\ProfessionalController;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
 /**
  * @property string $professional_id
+ * @property ConsultationAnnouncementCategories $category
  */
 class ConsultationAnnouncement extends Model
 {
@@ -27,9 +30,25 @@ class ConsultationAnnouncement extends Model
         'description'
     ];
 
-    public function appointment_times(): HasMany
+    protected $appends = [
+        'category_name'
+    ];
+
+    public function appointmentTimes(): HasMany
     {
         return $this->hasMany(ConsultationAppointmentTime::class);
+    }
+
+    public function professional(): BelongsTo
+    {
+        return $this->belongsTo(Professional::class, 'professional_id', 'user_id');
+    }
+
+    public function categoryName(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->category->getName(),
+        );
     }
 
     public function createByArray(array $appointmentList, bool $verifyAlreadyExists = false): void
@@ -54,8 +73,10 @@ class ConsultationAnnouncement extends Model
             $appointmentObjects[] = $consultationAppointmentTime;
         }
 
-        $this->appointment_times()->createMany(array_map(fn(ConsultationAppointmentTime $object) => $object->toArray(),
-            $appointmentObjects));
+        $this->appointmentTimes()->createMany(array_map(
+            fn (ConsultationAppointmentTime $object) => $object->toArray(),
+            $appointmentObjects
+        ));
 
         $this->getRelationValue('appointment_times');
     }

@@ -38,4 +38,10 @@ enum ConsultationAnnouncementCategories: string
     case PersonalBusinessInvestor = 'personal_business_investor';
     case PersonalBusinessLender = 'personal_business_lender';
 
+    public function getName(): string
+    {
+        /** @var ConsultationAnnouncementCategoriesPtBr $enumUnit */
+        $enumUnit = constant(ConsultationAnnouncementCategoriesPtBr::class . '::' . $this->name);
+        return $enumUnit->value;
+    }
 }

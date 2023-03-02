@@ -83,7 +83,7 @@ return [
     |
     */
 
-    'locale' => 'en',
+    'locale' => 'pt-BR',
 
     /*
     |--------------------------------------------------------------------------
@@ -200,8 +200,7 @@ return [
         /*
          * Custom Service Providers...
          */
-        MongodbServiceProvider::class,
-        Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class
+        MongodbServiceProvider::class
     ],
 
     /*

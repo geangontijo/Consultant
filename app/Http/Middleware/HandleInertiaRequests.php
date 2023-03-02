@@ -2,7 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use Illuminate\Contracts\Support\MessageBag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Middleware;
 use Tightenco\Ziggy\Ziggy;
 
@@ -35,10 +37,40 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'ziggy' => function () use ($request) {
-                return array_merge((new Ziggy)->toArray(), [
+                return array_merge((new Ziggy())->toArray(), [
                     'location' => $request->url(),
                 ]);
             },
         ]);
+    }
+
+    public function resolveValidationErrors(Request $request): object
+    {
+        if (!$request->hasSession() || !$request->session()->has('errors')) {
+            return (object)[];
+        }
+
+        return (object)collect($request->session()->get('errors')->getBags())->map(
+            fn (MessageBag $bag) => (object)collect($bag->messages())->reduce(
+                fn (array $total, array $item, string $key) => array_merge(
+                    $total,
+                    [$key => [
+                        'messages' => $item,
+                        'name' => Str::of($key)->replace('_', ' ')->ucfirst()->value()
+                    ]]
+                ),
+                []
+            )
+        )->pipe(function ($bags) use ($request) {
+            if ($bags->has('default') && $request->header('x-inertia-error-bag')) {
+                return [$request->header('x-inertia-error-bag') => $bags->get('default')];
+            }
+
+            if ($bags->has('default')) {
+                return $bags->get('default');
+            }
+
+            return $bags->toArray();
+        });
     }
 }
