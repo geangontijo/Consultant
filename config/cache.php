@@ -92,6 +92,11 @@ return [
             'driver' => 'octane',
         ],
 
+        'mongodb' => [
+            'driver' => 'mongodb',
+            'connection' => 'mongodb',
+            'table' => 'cache',
+        ],
     ],
 
     /*

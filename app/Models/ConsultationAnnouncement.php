@@ -27,7 +27,8 @@ class ConsultationAnnouncement extends Model
 
     protected $fillable = [
         'category',
-        'description'
+        'description',
+        'professional_id'
     ];
 
     protected $appends = [

@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Contracts\Support\MessageBag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Inertia\Middleware;
 use Tightenco\Ziggy\Ziggy;
@@ -52,12 +53,15 @@ class HandleInertiaRequests extends Middleware
 
         return (object)collect($request->session()->get('errors')->getBags())->map(
             fn (MessageBag $bag) => (object)collect($bag->messages())->reduce(
+                // TODO: Criar um agrupamento dos erros.
                 fn (array $total, array $item, string $key) => array_merge(
                     $total,
-                    [$key => [
-                        'messages' => $item,
-                        'name' => Str::of($key)->replace('_', ' ')->ucfirst()->value()
-                    ]]
+                    [
+                        $key => [
+                            'messages' => $item,
+                            'name' => Str::of(Arr::get(trans("validation.attributes"), preg_replace('/\.\d\./', '.*.', $key)))->replace('_', ' ')->ucfirst()->value()
+                        ]
+                    ]
                 ),
                 []
             )

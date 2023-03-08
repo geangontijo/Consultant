@@ -37,4 +37,11 @@ enum ConsultationAnnouncementCategoriesPtBr: string
     case PersonalBusinessBroker = 'Corretor de negócios';
     case PersonalBusinessInvestor = 'Investidor de negócios';
     case PersonalBusinessLender = 'Emprestador de negócios';
+
+    public function getBaseEnum(): ConsultationAnnouncementCategories
+    {
+        /** @var ConsultationAnnouncementCategories $enumUnit */
+        $enumUnit = constant(ConsultationAnnouncementCategories::class . '::' . $this->name);
+        return $enumUnit;
+    }
 }

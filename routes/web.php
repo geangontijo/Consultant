@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ProfessionalController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
+use App\Models\ConsultationAnnouncement;
 use App\Models\Order;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -41,10 +43,6 @@ Route::get('/search', [HomeController::class, 'search'])->name('home.search');
 
 Route::get('/announce/{id}', [HomeController::class, 'announce'])->name('announce');
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -66,6 +64,18 @@ Route::middleware('auth')->group(function () {
     })->name('checkout');
 
     Route::post('/checkout/{order}/pay', [CheckoutController::class, 'pay'])->name('checkout.pay');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', function () {
+        $announces = ConsultationAnnouncement::with('appointmentTimes')
+            ->where('professional_id', auth()->id())
+            ->get();
+        return Inertia::render('Dashboard', compact('announces'));
+    })->name('dashboard');
+
+    Route::post('/announce', [ProfessionalController::class, 'storeAnnounce'])->name('announce.store');
+    Route::delete('/announce/{id}', [ProfessionalController::class, 'destroyAnnounce'])->name('announce.destroy');
 });
 
 require __DIR__.'/auth.php';

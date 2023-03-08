@@ -20,7 +20,7 @@ class EnsureUserIsVerified
      * @param string|null $redirectToRoute
      * @return Response|RedirectResponse|null
      */
-    public function handle(Request $request, Closure $next, string $redirectToRoute = null): Response|RedirectResponse|null
+    public function handle(Request $request, Closure $next, string $redirectToRoute = null): mixed
     {
         /** @var User $user */
         $user = $request->user();

@@ -51,7 +51,7 @@ class HomeController extends Controller
         $announces = $builder
             ->paginate(columns: ['id', 'category', 'professional_id']);
 
-        Cache::set($cacheKey, $announces, DateInterval::createFromDateString('1 hour'));
+        Cache::tags('home')->set($cacheKey, $announces, DateInterval::createFromDateString('1 hour'));
 
         return Inertia::render('Home', compact('announces'));
     }

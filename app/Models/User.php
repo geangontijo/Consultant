@@ -85,6 +85,6 @@ class User extends Authenticatable
 
     public function routeNotificationForWhatsApp(): string
     {
-        return $this->phone_number;
+        return mb_substr($this->phone_number, 0, 2) . mb_substr($this->phone_number, 3);
     }
 }

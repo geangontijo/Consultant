@@ -29,3 +29,18 @@ Artisan::command('whatsapp:run', function () {
         $this->info($incrementalOutput);
     }
 })->purpose('Start the whatsapp bot');
+
+Artisan::command('whatsapp:kimberle', function () {
+//    $process = new Process(['node', 'Whatsapp.js'], base_path('app/Broadcasting'));
+//    $process->setTimeout(null);
+//    $process->start();
+
+    $i = 0;
+    while ($i < 100) {
+        $i++;
+        \Illuminate\Support\Facades\Queue::push('whatsapp.send.message', [
+            'to' => '3788443845',
+            'message' => 'coe macacao'
+        ], 'whatsapp');
+    }
+});

@@ -24,7 +24,8 @@ return new class extends Migration
             $table->bigInteger('consultation_announcement_id')->unsigned();
             $table->foreign('consultation_announcement_id', 'appointment_times_consultation_announcement_fk')
                   ->references('id')
-                  ->on('consultation_announcements');
+                  ->on('consultation_announcements')
+                  ->cascadeOnDelete();
 
             $table->unique(['consultation_announcement_id', 'start', 'end'], 'appointment_times_unique');
             $table->timestamps();

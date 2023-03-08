@@ -12,10 +12,12 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Manager;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
+use Penance316\Validators\IsoDateValidator;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -83,6 +85,8 @@ class AppServiceProvider extends ServiceProvider
         )->baseUrl('https://api.stripe.com/v1/')->withOptions([
             'verify' => App::isProduction()
         ])->asForm());
+
+        Validator::extend('iso_date', IsoDateValidator::class . '@validateIsoDate');
 
         Sanctum::$personalAccessTokenModel = PersonalAccessToken::class;
         DB::listen(function (QueryExecuted $query) {
