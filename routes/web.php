@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\OrderStatus;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfessionalController;
@@ -8,6 +9,7 @@ use App\Http\Controllers\UserController;
 use App\Models\ConsultationAnnouncement;
 use App\Models\Order;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -71,7 +73,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $announces = ConsultationAnnouncement::with('appointmentTimes')
             ->where('professional_id', auth()->id())
             ->get();
-        return Inertia::render('Dashboard', compact('announces'));
+
+        $sales = DB::table('cart_items')
+            ->select(['orders.items_amount', 'orders.updated_at'])
+            ->join('orders', 'cart_items.order_id', '=', 'orders.id')
+            ->join('consultation_appointment_times', 'cart_items.product_id', '=', 'consultation_appointment_times.id')
+            ->where('orders.status', '=', OrderStatus::Paid)->get();
+
+        return Inertia::render('Dashboard', compact('announces', 'sales'));
     })->name('dashboard');
 
     Route::post('/announce', [ProfessionalController::class, 'storeAnnounce'])->name('announce.store');

@@ -19,7 +19,8 @@ const formAnnounce = useForm({
 });
 
 const props = defineProps({
-    announces: Array
+    announces: Array,
+    sales: Array
 });
 
 function resetForm() {
@@ -197,6 +198,34 @@ function removeAnnounce() {
                 </VMenu>
             </VRow>
         </a>
+
+        <a href="#future-balance">
+            <h3>Saldo futuro</h3>
+        </a>
+
+        <VCard>
+            <VCardTitle>
+                R$ {{ maskMoney('0.00') }}
+            </VCardTitle>
+
+            <VDivider />
+
+            <VCard>
+                <VCardTitle>Vendas:</VCardTitle>
+
+                <VCardText>
+                    <VList>
+                        <VListItem :key="key" v-for="(sale, key) in props.sales">
+                            <VListItemTitle>
+                                <VIcon>mdi-cash</VIcon>
+                                {{ moment(sale.updated_at).fromNow() }}
+                            </VListItemTitle>
+                            <VListItemSubtitle>R$ {{ maskMoney(sale.items_amount) }}</VListItemSubtitle>
+                        </VListItem>
+                    </VList>
+                </VCardText>
+            </VCard>
+        </VCard>
 
         <VDialog max-width="1200" v-model="formAnnounce.openDialog" :persistent="formAnnounce.processing">
             <VForm @submit.prevent="submitFormAnnounce" validate-on="submit" :disabled="formAnnounce.processing">
