@@ -42,7 +42,7 @@ class AppServiceProvider extends ServiceProvider
                 return $request->withHeader(
                     'Authorization',
                     'Basic ' . base64_encode(
-                        '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'
+                        env('STRIPE_SECRET')
                     ) . ':'
                 );
             })
