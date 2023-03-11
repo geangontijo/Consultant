@@ -25,10 +25,10 @@ const submit = () => {
         <Head title="Cadastro"/>
 
         <VForm @submit.prevent="submit">
-            <VTextField label="Nome" v-model="form.name"></VTextField>
-            <VTextField label="Email" v-model="form.email"></VTextField>
-            <VTextField label="Senha" type="password" v-model="form.password"></VTextField>
-            <VTextField label="Confirmar Senha" type="password" v-model="form.password_confirmation"></VTextField>
+            <VTextField label="Nome" name="name" v-model="form.name"></VTextField>
+            <VTextField label="Email" name="email" v-model="form.email"></VTextField>
+            <VTextField label="Senha" type="password" name="password" v-model="form.password"></VTextField>
+            <VTextField label="Confirmar Senha" type="password" name="password_confirmation" v-model="form.password_confirmation"></VTextField>
             <VRow no-gutters justify="space-between">
                 <Link :href="route('login')">Já cadastrado?</Link>
                 <VBtn type="submit" color="primary">Cadastrar</VBtn>
