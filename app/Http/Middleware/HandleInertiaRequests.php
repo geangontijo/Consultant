@@ -48,23 +48,28 @@ class HandleInertiaRequests extends Middleware
     public function resolveValidationErrors(Request $request): object
     {
         if (!$request->hasSession() || !$request->session()->has('errors')) {
-            return (object)[];
+            return (object) [];
         }
 
-        return (object)collect($request->session()->get('errors')->getBags())->map(
-            fn (MessageBag $bag) => (object)collect($bag->messages())->reduce(
-            // TODO: Criar um agrupamento dos erros.
-                fn (array $total, array $item, string $key) => array_merge(
-                    $total,
-                    [
-                        $key => [
-                            'messages' => $item,
-                            'name' => Str::of(Lang::attribute($key))->replace('_', ' ')->ucfirst()->value()
+        $bags = $request->session()->get('errors')->getBags();
+
+        return (object) collect($bags)->map(function (MessageBag $bag) {
+            return (object) collect($bag->messages())->reduce(
+                // TODO: Criar um agrupamento dos erros.
+                function (array $total, array $item, string $key) {
+                    return array_merge(
+                        $total,
+                        [
+                            $key => [
+                                'messages' => $item,
+                                'name' => Str::of(Lang::attribute($key))->replace('_', ' ')->ucfirst()->value(),
+                            ],
                         ]
-                    ]
-                ),
+                    );
+                },
                 []
-            )
+            );
+        }
         )->pipe(function ($bags) use ($request) {
             if ($bags->has('default') && $request->header('x-inertia-error-bag')) {
                 return [$request->header('x-inertia-error-bag') => $bags->get('default')];

@@ -37,6 +37,7 @@ enum ConsultationAnnouncementCategories: string
     case PersonalBusinessBroker = 'personal_business_broker';
     case PersonalBusinessInvestor = 'personal_business_investor';
     case PersonalBusinessLender = 'personal_business_lender';
+    case CarRent = 'car_rent';
 
     public function getName(): string
     {

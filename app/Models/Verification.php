@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use DateTime;
 use Spatie\DataTransferObject\DataTransferObject;
 
 class Verification extends DataTransferObject
@@ -15,6 +14,6 @@ class Verification extends DataTransferObject
      */
     public function hasExpired(): bool
     {
-        return new DateTime($this->expires_at) < new DateTime();
+        return new \DateTime($this->expires_at) < new \DateTime();
     }
 }

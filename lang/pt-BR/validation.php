@@ -211,6 +211,10 @@ return [
         'appointment_times.*.start' => 'horário de início',
         'appointment_times.*.end' => 'horário de término',
         'appointment_times.*.price' => 'preço do horário',
+        'phone_number' => 'telefone',
+        'taxpayer_id' => 'CPF',
+        'profile_photo' => 'foto de perfil',
+        'verification_code' => 'código de verificação'
     ],
 
 ];

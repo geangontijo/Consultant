@@ -5,17 +5,17 @@ use Tests\TestCase;
 
 class LangAttributeTest extends TestCase
 {
-    public function test_should_return_attribute_name()
+    public function testShouldReturnAttributeName()
     {
         $attributeName = Lang::attribute('password');
 
         self::assertEquals('senha', $attributeName);
     }
 
-    public function test_should_not_return_attribute_name()
+    public function testShouldReturnAttributeKey()
     {
         $attributeName = Lang::attribute('non-existent-attribute');
 
-        self::assertEmpty($attributeName);
+        self::assertEquals('non-existent-attribute', $attributeName);
     }
 }

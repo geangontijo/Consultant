@@ -4,6 +4,7 @@ import {Head, Link, useForm} from '@inertiajs/vue3';
 import Default from "@/Layouts/Default.vue";
 import AppErrors from '@/Components/AppErrors.vue';
 import {reactive} from "vue";
+import AuthLayout from "@/Layouts/AuthLayout.vue";
 
 defineProps({
     canResetPassword: Boolean,
@@ -17,6 +18,7 @@ const data = reactive({
 const form = useForm({
     email: '',
     password: '',
+    passwordVisible: false
 });
 const submit = async (event) => {
     let resultValidation = await event
@@ -33,43 +35,40 @@ const submit = async (event) => {
 <template>
     <Default>
         <Head title="Entrar"/>
+        <AuthLayout>
+            <VForm validate-on="submit" @submit.prevent="submit">
+                <VTextField
+                    v-model="form.email"
+                    :rules="[() => !!form.email || 'O e-mail é obrigatório']"
+                    autocomplete="email"
+                    label="E-mail"
+                    type="email"
+                />
 
-        <AppErrors :errors="form.errors"/>
-        <br>
-        <br>
-        <br>
-        <VRow no-gutters justify="center" align="center">
-            <VCol cols="6">
-                <VForm @submit.prevent="submit" validate-on="submit">
-                    <VTextField
-                        label="E-mail"
-                        type="email"
-                        v-model="form.email"
-                        autocomplete="email"
-                        :rules="[() => !!form.email || 'O e-mail é obrigatório']"
-                    />
+                <VTextField
+                    v-model="form.password"
+                    :append-icon="form.passwordVisible ? 'mdi-eye-off' : 'mdi-eye'"
+                    :rules="[() => !!form.password || 'A senha é obrigatória']"
+                    :type="form.passwordVisible ? 'text' : 'password'"
+                    autocomplete="password"
+                    label="Senha"
+                    @click:append="() => (form.passwordVisible = !form.passwordVisible)"
+                />
 
-                    <VTextField
-                        label="Senha"
-                        type="password"
-                        v-model="form.password"
-                        autocomplete="password"
-                        :rules="[() => !!form.password || 'A senha é obrigatória']"
-                    />
-
+                <VRow no-gutters>
                     <Link
                         v-if="canResetPassword"
                         :href="route('password.request')"
-                        class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     >
                         Esqueceu sua senha?
                     </Link>
-
-                    <VBtn type="submit" class="ml-4" block color="primary" :loading="data.loading">
+                    <VSpacer/>
+                    <VBtn :loading="data.loading" color="primary" type="submit">
                         Login
                     </VBtn>
-                </VForm>
-            </VCol>
-        </VRow>
+                </VRow>
+            </VForm>
+            <AppErrors :errors="form.errors"/>
+        </AuthLayout>
     </Default>
 </template>

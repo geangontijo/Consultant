@@ -18,5 +18,16 @@ return [
     'throttle' => 'Muitas tentativas de login. Tente novamente em :seconds segundos.',
     'verify.failed' => 'Seu usuário não está verificado.',
     'verify.failed_code' => 'O código digitado pelo não corresponde ao código enviado pela notificação.',
-    'verify.expired' => 'Seu código de verificação foi expirado.'
+    'verify.expired' => 'Seu código de verificação foi expirado.',
+    'password.forget.notification' => <<<'WHATSAPP'
+Você está recebendo esta notificação porque recebemos uma solicitação de redefinição de senha para sua conta.
+
+:url
+
+Este link de redefinição de senha expirará em :count minutos.
+Se você não solicitou uma redefinição de senha, nenhuma ação adicional será necessária.
+
+Obrigado,
+:app
+WHATSAPP,
 ];

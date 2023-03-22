@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\ConsultationAnnouncementCategoriesPtBr;
 use App\Enums\OrderStatus;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\HomeController;
@@ -8,7 +9,6 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Models\ConsultationAnnouncement;
 use App\Models\Order;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -80,11 +80,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->join('consultation_appointment_times', 'cart_items.product_id', '=', 'consultation_appointment_times.id')
             ->where('orders.status', '=', OrderStatus::Paid)->get();
 
-        return Inertia::render('Dashboard', compact('announces', 'sales'));
+        $categories = ConsultationAnnouncementCategoriesPtBr::cases();
+
+        return Inertia::render('Dashboard', compact('announces', 'sales', 'categories'));
     })->name('dashboard');
 
     Route::post('/announce', [ProfessionalController::class, 'storeAnnounce'])->name('announce.store');
     Route::delete('/announce/{id}', [ProfessionalController::class, 'destroyAnnounce'])->name('announce.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

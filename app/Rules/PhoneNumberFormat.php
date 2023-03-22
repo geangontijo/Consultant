@@ -13,7 +13,7 @@ class PhoneNumberFormat implements Rule
      * @param mixed $value
      * @return bool
      */
-    public function passes($attribute, $value)
+    public function passes($attribute, $value): bool
     {
         $numbers = preg_replace('/[^0-9]/', '', $value);
         return mb_strlen($numbers) === 11;

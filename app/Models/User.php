@@ -5,13 +5,14 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Casts\OnlyNumbers;
 use App\Casts\VerificationJson;
+use App\Notifications\ResetPassword;
 use DateTime;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Jenssegers\Mongodb\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Jenssegers\Mongodb\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
@@ -40,7 +41,8 @@ class User extends Authenticatable
         'password',
         'email',
         'verification',
-        'verified_at'
+        'verified_at',
+        'phone_number'
     ];
 
     /**
@@ -58,6 +60,21 @@ class User extends Authenticatable
         'verified_at' => 'datetime',
         'phone_number' => OnlyNumbers::class,
     ];
+
+    public function routeNotificationForWhatsApp(): string
+    {
+        return mb_substr($this->phone_number, 0, 2) . mb_substr($this->phone_number, 3);
+    }
+
+    public function routeNotificationForMail(): string
+    {
+        return $this->email ?: '';
+    }
+
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new ResetPassword($token));
+    }
 
     protected function password(): Attribute
     {
@@ -81,10 +98,5 @@ class User extends Authenticatable
             },
             set: fn (?Verification $value) => $value
         );
-    }
-
-    public function routeNotificationForWhatsApp(): string
-    {
-        return mb_substr($this->phone_number, 0, 2) . mb_substr($this->phone_number, 3);
     }
 }

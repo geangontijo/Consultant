@@ -37,6 +37,7 @@ enum ConsultationAnnouncementCategoriesPtBr: string
     case PersonalBusinessBroker = 'Corretor de negócios';
     case PersonalBusinessInvestor = 'Investidor de negócios';
     case PersonalBusinessLender = 'Emprestador de negócios';
+    case CarRent = 'Aluguel de carro';
 
     public function getBaseEnum(): ConsultationAnnouncementCategories
     {

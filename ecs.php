@@ -25,7 +25,7 @@ return $config
         'class_attributes_separation' => true,
         'class_definition' => ['inline_constructor_arguments' => false, 'space_before_parenthesis' => true],
         'class_reference_name_casing' => true,
-
+        'php_unit_method_casing' => ['case' => 'snake_case'],
         'clean_namespace' => true,
         'combine_consecutive_issets' => true,
         'combine_consecutive_unsets' => true,

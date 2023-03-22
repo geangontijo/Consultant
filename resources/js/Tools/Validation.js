@@ -104,6 +104,13 @@ export default class Validation {
         return this;
     }
 
+    email() {
+        this.rules.push(value => {
+            return (/\S+@\S+\.\S+/.test(value)) || `O campo ${this.fieldName} deve ser um e-mail válido`
+        });
+        return this;
+    }
+
     get() {
         return this.rules.map(rule => {
             return (value) => {

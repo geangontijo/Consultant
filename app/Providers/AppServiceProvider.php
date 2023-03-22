@@ -3,15 +3,25 @@
 namespace App\Providers;
 
 use App\Models\PersonalAccessToken;
+use App\Models\Professional;
 use Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider;
 use DomainException;
 use GuzzleHttp\Middleware;
+use Illuminate\Auth\Passwords\DatabaseTokenRepository;
+use Illuminate\Auth\Passwords\TokenRepositoryInterface;
 use Illuminate\Database\Events\QueryExecuted;
-use Illuminate\Support\{Arr, ServiceProvider, Str};
-use Illuminate\Support\Facades\{App, DB, Http, Lang, Validator};
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Lang;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 use Penance316\Validators\IsoDateValidator;
-use Psr\Http\Message\{RequestInterface, ResponseInterface};
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use function array_key_exists;
 
 class AppServiceProvider extends ServiceProvider
@@ -60,13 +70,8 @@ class AppServiceProvider extends ServiceProvider
                         'error',
                         $contents
                     )) {
-                    throw new DomainException(
-                        Arr::get(
-                            $contents,
-                            'errors.0.message',
-                            Arr::get($contents, 'error.message', 'Stripe API error.')
-                        )
-                    );
+                    throw new DomainException(Arr::get($contents, 'errors.0.message',
+                        Arr::get($contents, 'error.message', 'Stripe API error.')));
                 }
 
                 return $response;
@@ -80,7 +85,27 @@ class AppServiceProvider extends ServiceProvider
         Lang::macro('attribute', function (string $key): string|null {
             $attribute = Arr::get(trans('validation.attributes'), preg_replace('/\.\d\./', '.*.', $key));
 
-            return $attribute;
+            return $attribute ?? $key;
+        });
+        $this->app->instance(Professional::class, new Professional());
+        $this->app->bind(TokenRepositoryInterface::class, function () {
+            $key = $this->app['config']['app.key'];
+
+            if (str_starts_with($key, 'base64:')) {
+                $key = base64_decode(substr($key, 7));
+            }
+
+            $defaultPasswordBroker = $this->app['config']['auth.defaults.passwords'];
+            $config = $this->app['config']["auth.passwords.{$defaultPasswordBroker}"];
+            # TODO: connection be mongodb
+            return new DatabaseTokenRepository(
+                $this->app['db']->connection(),
+                $this->app['hash'],
+                $config['table'],
+                $key,
+                $config['expire'],
+                $config['throttle'] ?? 0
+            );
         });
 
         Sanctum::$personalAccessTokenModel = PersonalAccessToken::class;

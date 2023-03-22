@@ -1,59 +1,69 @@
 <script setup>
-import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
-import { Head, useForm } from '@inertiajs/vue3';
-
-defineProps({
-    status: String,
-});
+import {Head, useForm} from '@inertiajs/vue3';
+import Default from "@/Layouts/Default.vue";
+import AuthLayout from "@/Layouts/AuthLayout.vue";
+import Validation from "@/Tools/Validation";
+import Filters from "@/Tools/Filters";
+import AppErrors from "@/Components/AppErrors.vue";
 
 const form = useForm({
     email: '',
+    phone_number: '',
 });
 
-const submit = () => {
-    form.post(route('password.email'));
+const submit = async (evt) => {
+    const result = await evt;
+    if (!result.valid) return;
+
+    form.post(route('password.forgot'));
 };
 </script>
 
 <template>
-    <GuestLayout>
-        <Head title="Forgot Password" />
+    <Default>
+        <AuthLayout>
+            <Head title="Recuperar senha"/>
 
-        <div class="mb-4 text-sm text-gray-600">
-            Forgot your password? No problem. Just let us know your email address and we will email you a password reset
-            link that will allow you to choose a new one.
-        </div>
-
-        <div v-if="status" class="mb-4 font-medium text-sm text-green-600">
-            {{ status }}
-        </div>
-
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="email" value="Email" />
-
-                <TextInput
-                    id="email"
-                    type="email"
-                    class="mt-1 block w-full"
+            <VForm :disabled="form.processing" validate-on="submit" @submit.prevent="submit">
+                <VTextField
                     v-model="form.email"
-                    required
+                    :rules="new Validation('email').if(!form.phone_number, self => self.required().email()).get()"
                     autofocus
-                    autocomplete="username"
-                />
+                    hide-details
+                    label="Email"
+                    name="email"/>
+                <VRow align="center" class="my-1">
+                    <VCol cols="5">
+                        <VDivider/>
+                    </VCol>
+                    <VCol class="text-center" cols="2">
+                        <span class="mx-3">Ou</span>
+                    </VCol>
+                    <VCol cols="5">
+                        <VDivider/>
+                    </VCol>
+                </VRow>
+                <VTextField
+                    :model-value="form.phone_number"
+                    :rules="new Validation('telefone').if(!form.email, self => self.required()).get()"
+                    label="Telefone"
+                    maxlength="16"
+                    name="phone_number"
+                    @input="evt => form.phone_number = Filters.maskPhone(evt.target.value)"/>
 
-                <InputError class="mt-2" :message="form.errors.email" />
-            </div>
+                <VRow no-gutters>
+                    <a :href="route('login')">Fazer login</a>
+                    <VSpacer/>
+                    <VBtn
+                        :loading="form.processing"
+                        color="primary"
+                        type="submit"
+                    >Recuperar senha
+                    </VBtn>
+                </VRow>
+            </VForm>
 
-            <div class="flex items-center justify-end mt-4">
-                <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                    Email Password Reset Link
-                </PrimaryButton>
-            </div>
-        </form>
-    </GuestLayout>
+            <AppErrors :errors="form.errors"/>
+        </AuthLayout>
+    </Default>
 </template>

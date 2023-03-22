@@ -1,0 +1,1 @@
+[SQL] insert into `telescope_entries` (`batch_id`, `content`, `created_at`, `family_hash`, `type`, `uuid`) values (?, ?, ?, ?, ?, ?) 

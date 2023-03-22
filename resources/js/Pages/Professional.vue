@@ -5,6 +5,7 @@ import {Mask} from "maska";
 import AppErrors from "@/Components/AppErrors.vue";
 import {reactive} from "vue";
 import Validation from "@/Tools/Validation";
+import Filters from "@/Tools/Filters";
 
 const form = useForm({
     taxpayer_id: '',
@@ -23,7 +24,7 @@ function maskTaxpayerId(inputEvent) {
 
 function maskPhone(inputEvent) {
     const newVal = inputEvent.target.value.replaceAll(/[^\d]/g, '')
-    form.phone_number = String(new Mask({mask: '(##) # ####-####'}).masked(newVal)).substring(0, 16)
+    form.phone_number = Filters.maskPhone(newVal)
 }
 
 async function submit(evt) {

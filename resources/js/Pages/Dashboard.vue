@@ -20,7 +20,8 @@ const formAnnounce = useForm({
 
 const props = defineProps({
     announces: Array,
-    sales: Array
+    sales: Array,
+    categories: Array,
 });
 
 function resetForm() {
@@ -144,14 +145,14 @@ function removeAnnounce() {
                 </VBtn>
             </VRow>
         </a>
-        <VRow v-if="props.announces.length === 0" no-gutters justify="center">
+        <VRow v-if="props.announces.length === 0" justify="center" no-gutters>
             <h4>Você ainda não criou nenhum anúncio.</h4>
         </VRow>
         <VRow>
-            <VCol cols="12" sm="6" v-for="announce in props.announces">
+            <VCol v-for="announce in props.announces" cols="12" sm="6">
                 <VCard variant="elevated">
                     <VCardTitle>
-                        <VRow no-gutters align="center">
+                        <VRow align="center" no-gutters>
                             #{{ announce.id }} - {{ announce.category_name }}
                             <VSpacer/>
                             <VBtn variant="text" @click="resetForm(); editAnnounce(announce)">
@@ -175,7 +176,7 @@ function removeAnnounce() {
                 <VSpacer/>
                 <VMenu>
                     <template v-slot:activator="{ props }">
-                        <VBtn variant="text" v-bind="props">
+                        <VBtn v-bind="props" variant="text">
                             Exportar agenda
                         </VBtn>
                     </template>
@@ -208,14 +209,14 @@ function removeAnnounce() {
                 R$ {{ maskMoney('0.00') }}
             </VCardTitle>
 
-            <VDivider />
+            <VDivider/>
 
             <VCard>
                 <VCardTitle>Vendas:</VCardTitle>
 
                 <VCardText>
                     <VList>
-                        <VListItem :key="key" v-for="(sale, key) in props.sales">
+                        <VListItem v-for="(sale, key) in props.sales" :key="key">
                             <VListItemTitle>
                                 <VIcon>mdi-cash</VIcon>
                                 {{ moment(sale.updated_at).fromNow() }}
@@ -227,8 +228,8 @@ function removeAnnounce() {
             </VCard>
         </VCard>
 
-        <VDialog max-width="1200" v-model="formAnnounce.openDialog" :persistent="formAnnounce.processing">
-            <VForm @submit.prevent="submitFormAnnounce" validate-on="submit" :disabled="formAnnounce.processing">
+        <VDialog v-model="formAnnounce.openDialog" :persistent="formAnnounce.processing" max-width="1200">
+            <VForm :disabled="formAnnounce.processing" validate-on="submit" @submit.prevent="submitFormAnnounce">
                 <VCard>
                     <VCardTitle>
                         <VRow no-gutters>
@@ -236,89 +237,93 @@ function removeAnnounce() {
                                     formAnnounce.id === 0 ? 'Novo anúncio' : `Alterar anúncio #${formAnnounce.id}`
                                 }}</h3>
                             <VSpacer/>
-                            <VBtn type="button"
+                            <VBtn :disabled="formAnnounce.processing"
+                                  type="button"
                                   variant="text"
-                                  @click="resetForm();formAnnounce.openDialog = false"
-                                  :disabled="formAnnounce.processing">
+                                  @click="resetForm();formAnnounce.openDialog = false">
                                 <VIcon>mdi-close</VIcon>
                             </VBtn>
                         </VRow>
                     </VCardTitle>
+                    <VDivider/>
                     <VCardText>
                         <VRow>
                             <VCol cols="12" sm="6">
                                 <h4>Informações do anúncio:</h4>
-                                <VTextField v-model="formAnnounce.category"
-                                            label="Categoria"
-                                            placeholder="Categoria do anúncio"
-                                            :rules="new Validation('categoria').required().get()"/>
+                                <VAutocomplete v-model="formAnnounce.category"
+                                               :items="props.categories"
+                                               :rules="new Validation('categoria').required().get()"
+                                               label="Categoria"
+                                               placeholder="Categoria do anúncio"/>
                                 <VTextarea v-model="formAnnounce.description"
+                                           :rules="new Validation('descrição').required().get()"
                                            label="Descrição"
-                                           placeholder="Descrição do anúncio"
-                                           :rules="new Validation('descrição').required().get()"/>
+                                           placeholder="Descrição do anúncio"/>
                                 <VTextField :model-value="formAnnounce.defaultPrice"
-                                            @input="val => formAnnounce.defaultPrice = maskMoney(val.target.value)"
                                             :rules="new Validation('preço').money().greatestThan(0).get()"
                                             label="Preço"
                                             placeholder="Preço padrão de cada horário"
                                             prefix="R$"
+                                            @input="val => formAnnounce.defaultPrice = maskMoney(val.target.value)"
                                 />
                             </VCol>
                             <VDivider vertical/>
                             <VCol cols="12" sm="6">
                                 <h4>Lista de horários disponíveis</h4>
 
-                                <VRow no-gutters v-for="(appointment_time, key) in formAnnounce.appointment_times">
+                                <VRow v-for="(appointment_time, key) in formAnnounce.appointment_times"
+                                      :key="key"
+                                      no-gutters>
                                     <VCol cols="12" sm="5">
                                         <VTextField :model-value="appointment_time.day"
-                                                    @input="val => appointment_time.day = maskDate(val.target.value)"
                                                     :rules="new Validation('dia da semana').required().date('DD/MM/YYYY')
                                                                 .greatestOrEqualThan(
                                                                     new Date().setHours(0, 0, 0, 0)
                                                                 ).get()"
-                                                    maxlength="10"
                                                     hide-details
                                                     label="Dia da semana"
-                                                    placeholder="dd/mm/yyyy"/>
+                                                    maxlength="10"
+                                                    placeholder="dd/mm/yyyy"
+                                                    @input="val => appointment_time.day = maskDate(val.target.value)"/>
                                     </VCol>
                                     <VCol cols="12" sm="2">
                                         <VTextField :model-value="appointment_time.start"
-                                                    @input="val => appointment_time.start = maskHour(val.target.value)"
-                                                    maxlength="5"
                                                     :rules="new Validation('início').required().time('HH:mm')
                                                         .if(appointment_time.day === moment().format('DD/MM/YYYY'),
                                                             self => self.greatestOrEqualThan(moment().seconds(0).milliseconds(0).toDate())
                                                         ).get()"
                                                     hide-details
                                                     label="Início"
-                                                    placeholder="Horário"/>
+                                                    maxlength="5"
+                                                    placeholder="Horário"
+                                                    @input="val => appointment_time.start = maskHour(val.target.value)"/>
                                     </VCol>
                                     <VCol cols="12" sm="2">
                                         <VTextField :model-value="appointment_time.end"
-                                                    @input="val => appointment_time.end = maskHour(val.target.value)"
-                                                    maxlength="5"
                                                     :rules="new Validation('final').required().time('hh:mm')
                                                         .if(appointment_time.day === moment().format('DD/MM/YYYY'),
                                                             self => self.greatestThan(moment(appointment_time.start, 'hh:mm').toDate())
                                                            ).get()"
-                                                    hide-details label="Fim"
-                                                    placeholder="Horário"
+                                                    hide-details
+                                                    label="Fim"
+                                                    maxlength="5" placeholder="Horário"
+                                                    @input="val => appointment_time.end = maskHour(val.target.value)"
                                         />
                                     </VCol>
                                     <VCol cols="12" sm="2">
                                         <VTextField :model-value="appointment_time.price"
-                                                    @input="val => appointment_time.price = maskMoney(val.target.value)"
-                                                    hide-details
                                                     :rules="new Validation('preço').required().money().greatestOrEqualThan(0).get()"
+                                                    hide-details
                                                     label="Preço"
                                                     placeholder="Preço"
                                                     prefix="R$"
+                                                    @input="val => appointment_time.price = maskMoney(val.target.value)"
                                         />
                                     </VCol>
                                     <VCol cols="12" sm="1">
-                                        <VBtn type="button" variant="text"
-                                              @click="formAnnounce.appointment_times.splice(key, 1)"
-                                              style="height: 100%">
+                                        <VBtn style="height: 100%" type="button"
+                                              variant="text"
+                                              @click="formAnnounce.appointment_times.splice(key, 1)">
                                             <VIcon>mdi-delete</VIcon>
                                         </VBtn>
                                     </VCol>
@@ -333,8 +338,8 @@ function removeAnnounce() {
                         </VRow>
                     </VCardText>
                     <VCardActions>
-                        <VRow type="submit" no-gutters justify="end">
-                            <VDialog max-width="500" :persistent="formAnnounce.processing">
+                        <VRow justify="end" no-gutters type="submit">
+                            <VDialog :persistent="formAnnounce.processing" max-width="500">
                                 <template v-slot:activator="{ props }">
                                     <VBtn v-if="formAnnounce.id" color="error" v-bind="props">Remover anuncio</VBtn>
                                 </template>
@@ -348,18 +353,18 @@ function removeAnnounce() {
                                     </VCardText>
 
                                     <VCardActions>
-                                        <VRow no-gutters justify="end">
-                                            <VBtn type="button" color="primary" @click="formAnnounce.openDialog = false"
-                                                  :disabled="formAnnounce.processing">Cancelar
+                                        <VRow justify="end" no-gutters>
+                                            <VBtn :disabled="formAnnounce.processing" color="primary" type="button"
+                                                  @click="formAnnounce.openDialog = false">Cancelar
                                             </VBtn>
-                                            <VBtn type="button" color="error" @click="removeAnnounce"
-                                                  :loading="formAnnounce.processing">Remover
+                                            <VBtn :loading="formAnnounce.processing" color="error" type="button"
+                                                  @click="removeAnnounce">Remover
                                             </VBtn>
                                         </VRow>
                                     </VCardActions>
                                 </VCard>
                             </VDialog>
-                            <VBtn :loading="formAnnounce.processing" type="submit" color="primary">Salvar</VBtn>
+                            <VBtn :loading="formAnnounce.processing" color="primary" type="submit">Salvar</VBtn>
                         </VRow>
                     </VCardActions>
                 </VCard>
